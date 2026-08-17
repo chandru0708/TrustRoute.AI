@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustRoute | Smart Location-Change Workflow</title>
+
+<!-- Modern Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-main: #0b0f19;
+    --bg-card: #151c2c;
+    --bg-card-hover: #1c263c;
+    --bg-input: #1a2336;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-color-hover: rgba(99, 102, 241, 0.4);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    --accent-primary: #6366f1;
+    --accent-primary-hover: #4f46e5;
+    --accent-glow: rgba(99, 102, 241, 0.25);
+
+    --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.12);
+    --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.12);
+    --info: #06b6d4;
+    --info-bg: rgba(6, 182, 212, 0.12);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --font-heading: 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  [data-theme="light"] {
+    --bg-main: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
+    --bg-input: #f8fafc;
+    --border-color: #e2e8f0;
+    --border-color-hover: rgba(99, 102, 241, 0.4);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+
+    --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Header */
+  header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--accent-primary), #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 4px 14px var(--accent-glow);
+  }
+  .brand-text h1 {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .brand-text p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Header Nav Tabs */
+  .nav-tabs {
+    display: flex;
+    background: var(--bg-input);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    gap: 4px;
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .tab-btn:hover {
+    color: var(--text-primary);
+  }
+  .tab-btn.active {
+    background: var(--bg-card);
+    color: var(--accent-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--success);
+    background: var(--success-bg);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--success);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+  }
+  .btn-primary {
+    background: var(--accent-primary);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+  .btn-primary:hover {
+    background: var(--accent-primary-hover);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    background: var(--bg-input);
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    border-color: var(--border-color-hover);
+  }
+  .btn-icon-only {
+    padding: 8px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Main Content Container */
+  .container {
+    max-width: 1400px;
+    margin: 24px auto;
+    padding: 0 24px;
+    width: 100%;
+    flex: 1;
+  }
+
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .tab-content.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Dashboard Overview Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    box-shadow: var(--shadow-card);
+  }
+  .kpi-card:hover {
+    border-color: var(--border-color-hover);
+    transform: translateY(-2px);
+  }
+  .kpi-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .kpi-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .kpi-value {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 800;
+    margin-top: 12px;
+    color: var(--text-primary);
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Layout Sections */
+  .grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 1024px) {
+    .grid-2col { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 24px;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .card-header h2 {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header .subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* Zone Capacity Progress Bars */
+  .zone-item {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    margin-bottom: 12px;
+  }
+  .zone-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .zone-name { font-weight: 600; color: var(--text-primary); }
+  .zone-stats { font-size: 12px; color: var(--text-secondary); }
+  .progress-bg {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Rider List */
+  .rider-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .rider-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rider-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--info));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .rider-info { flex: 1; }
+  .rider-name { font-size: 13px; font-weight: 600; }
+  .rider-load { font-size: 11px; color: var(--text-muted); }
+
+  /* Form Elements */
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .form-control {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    transition: all 0.2s ease;
+  }
+  .form-control:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* Preset Scenarios */
+  .preset-container {
+    margin-bottom: 20px;
+    padding: 14px;
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+  }
+  .preset-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .preset-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chip:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    transform: translateY(-1px);
+  }
+
+  /* Pipeline Stepper */
+  .pipeline-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+  .pipeline-stepper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+    position: relative;
+  }
+  .pipeline-stepper::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: var(--border-color);
+    z-index: 1;
+  }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+    z-index: 2;
+  }
+  .step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-input);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  .step-item.active .step-icon {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    background: var(--bg-card);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .step-item.passed .step-icon {
+    border-color: var(--success);
+    background: var(--success-bg);
+    color: var(--success);
+  }
+  .step-item.failed .step-icon {
+    border-color: var(--danger);
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+  .step-content {
+    flex: 1;
+    background: var(--bg-input);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+  }
+  .step-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .step-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Result Decision Banner */
+  .decision-banner {
+    padding: 18px;
+    border-radius: var(--radius-md);
+    margin-top: 20px;
+    display: none;
+    border: 1px solid transparent;
+    animation: fadeIn 0.3s ease;
+  }
+  .decision-banner.approved {
+    background: var(--success-bg);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: var(--text-primary);
+  }
+  .decision-banner.rejected {
+    background: var(--danger-bg);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: var(--text-primary);
+  }
+  .decision-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .decision-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  /* Data Tables */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  th {
+    background: var(--bg-input);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+  th:first-child { border-top-left-radius: var(--radius-sm); }
+  th:last-child { border-top-right-radius: var(--radius-sm); }
+  td {
+    padding: 14px 16px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td {
+    background: var(--bg-card-hover);
+  }
+
+  /* Badges & Status */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+  .badge-approved { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+  .badge-rejected { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+  .badge-fraud { background: rgba(15, 23, 42, 0.8); color: #f43f5e; border: 1px solid #f43f5e; }
+  .badge-pending { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+  .badge-channel { background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border-color); }
+
+  /* Filters & Controls Header */
+  .table-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+  .search-box {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
+  }
+  .search-box input {
+    padding-left: 36px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  /* Toast Notification */
+  #toastContainer {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .toast {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    animation: slideInRight 0.3s ease;
+  }
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* SVG Icons */
+  .icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    display: inline-block;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    header { padding: 12px 16px; flex-direction: column; gap: 12px; }
+    .container { padding: 0 12px; margin: 16px auto; }
+    .card { padding: 16px; }
+    .table-controls { flex-direction: column; align-items: stretch; }
+    .search-box { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header Top Bar -->
+<header>
+  <div class="brand">
+    <div class="brand-icon">
+      <svg class="icon" style="width:22px; height:22px;" viewBox="0 0 24 24">
+        <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <h1>TrustRoute.AI</h1>
+      <p>Field-Ready Temporary Location-Change Operations Workflow</p>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('overview', this)">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </button>
+    <button class="tab-btn" onclick="switchTab('simulator', this)">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+      Request Lab
+    </button>
+    <button class="tab-btn" onclick="switchTab('orders', this)">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+      Fleet & Orders
+    </button>
+    <button class="tab-btn" onclick="switchTab('audit', this)">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      Audit Log
+    </button>
+  </div>
+
+  <div class="header-actions">
+    <div class="live-badge">
+      <div class="pulse-dot"></div>
+      <span id="liveStatusText">Engine Active</span>
+    </div>
+    <button class="btn btn-ghost" onclick="refreshAll(true)" title="Refresh Data">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+    </button>
+    <button class="btn btn-ghost" onclick="resetDemoData()" title="Reseed Demo Data">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+      Reset Demo
+    </button>
+    <button class="btn btn-ghost btn-icon-only" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ================= TAB 1: OVERVIEW ================= -->
+  <div id="tab-overview" class="tab-content active">
+    <!-- Top KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">
+          <span>Total Change Requests</span>
+          <div class="kpi-icon" style="background: var(--info-bg); color: var(--info);">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpiTotal">0</div>
+        <div class="kpi-sub">Processed in system memory</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">
+          <span>Approved Requests</span>
+          <div class="kpi-icon" style="background: var(--success-bg); color: var(--success);">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" style="color: var(--success);" id="kpiApproved">0</div>
+        <div class="kpi-sub">Auto-approved or Dispatcher-validated</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">
+          <span>Rejected Requests</span>
+          <div class="kpi-icon" style="background: var(--danger-bg); color: var(--danger);">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" style="color: var(--danger);" id="kpiRejected">0</div>
+        <div class="kpi-sub">Time, Gate, or OTP Constraint failures</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">
+          <span>Fraud Flagged / Avg Risk</span>
+          <div class="kpi-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-5.45 9-12V5l-9-4zm-1 6h2v6h-2V7zm0 8h2v2h-2v-2z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" style="color: #f43f5e;" id="kpiFraud">0</div>
+        <div class="kpi-sub" id="kpiAvgScore">Avg Fraud Index: 0.00</div>
+      </div>
+    </div>
+
+    <!-- Zone Gate Capacity & Workforce Grid -->
+    <div class="grid-2col">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>
+              <svg class="icon" style="color: var(--accent-primary);" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              Destination Zone Gate Capacity
+            </h2>
+            <div class="subtitle">Real-time slot load & security gate closing restrictions</div>
+          </div>
+        </div>
+        <div id="zoneCapacityList">
+          <!-- Dynamic zones inserted here -->
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>
+              <svg class="icon" style="color: var(--info);" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+              Active Delivery Workforce
+            </h2>
+            <div class="subtitle">Rider shift allocations & active route loads</div>
+          </div>
+        </div>
+        <div class="rider-grid" id="riderList">
+          <!-- Dynamic riders inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 2: REQUEST LAB ================= -->
+  <div id="tab-simulator" class="tab-content">
+    <div class="grid-2col">
+      <!-- Form Panel -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>
+              <svg class="icon" style="color: var(--accent-primary);" viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C9.01 19.41 10.44 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C14.99 4.59 13.56 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
+              Location Change Simulator
+            </h2>
+            <div class="subtitle">Test baseline vs smart validated dispatcher algorithms</div>
+          </div>
+        </div>
+
+        <!-- 1-Click Preset Scenarios -->
+        <div class="preset-container">
+          <div class="preset-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+            Quick Preset Scenarios
+          </div>
+          <div class="preset-chips">
+            <div class="chip" onclick="applyPreset('legit_app')">🟢 Legitimate App Change</div>
+            <div class="chip" onclick="applyPreset('fraud_call')">🔴 Suspicious Phone Call (Fraud)</div>
+            <div class="chip" onclick="applyPreset('gate_close')">🟠 Gate Closed Violation</div>
+            <div class="chip" onclick="applyPreset('sms_otp')">🟡 SMS Step-up OTP Review</div>
+          </div>
+        </div>
+
+        <form id="changeRequestForm" onsubmit="handleFormSubmit(event)">
+          <div class="form-group">
+            <label>Select Active Order</label>
+            <select id="orderSelect" class="form-control"></select>
+          </div>
+
+          <div class="form-group">
+            <label>New Destination Zone</label>
+            <select id="zoneSelect" class="form-control"></select>
+          </div>
+
+          <div class="form-group">
+            <label>New Address Detail</label>
+            <input type="text" id="newAddressInput" class="form-control" placeholder="e.g. Cyber Towers, Wing C, Desk 44" required>
+          </div>
+
+          <div class="grid-2col" style="gap: 12px; margin-bottom: 0;">
+            <div class="form-group">
+              <label>Request Channel</label>
+              <select id="channelSelect" class="form-control">
+                <option value="app">📱 In-App (Authentic Token)</option>
+                <option value="sms">💬 SMS Message</option>
+                <option value="call">📞 Customer Phone Call</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Dispatcher Engine</label>
+              <select id="dispatcherType" class="form-control">
+                <option value="smart">⚡ Smart Validated Workflow</option>
+                <option value="baseline">⚠️ Baseline Naive Auto-Accept</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px; padding: 12px;">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            Execute Change Request Workflow
+          </button>
+        </form>
+      </div>
+
+      <!-- Live Pipeline Stepper Visualizer -->
+      <div class="pipeline-card">
+        <div class="card-header" style="margin-bottom: 8px;">
+          <div>
+            <h2>
+              <svg class="icon" style="color: var(--accent-primary);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+              Dispatch Decision Pipeline
+            </h2>
+            <div class="subtitle">Live verification steps performed by Smart Dispatcher</div>
+          </div>
+        </div>
+
+        <div class="pipeline-stepper" id="pipelineStepper">
+          <div class="step-item" id="pstep-1">
+            <div class="step-icon">1</div>
+            <div class="step-content">
+              <div class="step-title"><span>Fraud Risk Engine</span><small class="step-status">-</small></div>
+              <div class="step-desc">Rule-based scoring: velocity, account age, window timing & channel risk.</div>
+            </div>
+          </div>
+
+          <div class="step-item" id="pstep-2">
+            <div class="step-icon">2</div>
+            <div class="step-content">
+              <div class="step-title"><span>OTP / Identity Verification</span><small class="step-status">-</small></div>
+              <div class="step-desc">Step-up authentication required for non-app channels or review scores.</div>
+            </div>
+          </div>
+
+          <div class="step-item" id="pstep-3">
+            <div class="step-icon">3</div>
+            <div class="step-content">
+              <div class="step-title"><span>Delivery Window & Gate Hours</span><small class="step-status">-</small></div>
+              <div class="step-desc">Ensures delivery is promised prior to complex gate closure times.</div>
+            </div>
+          </div>
+
+          <div class="step-item" id="pstep-4">
+            <div class="step-icon">4</div>
+            <div class="step-content">
+              <div class="step-title"><span>Destination Zone Slot Capacity</span><small class="step-status">-</small></div>
+              <div class="step-desc">Validates gated apartment / office park slot limits.</div>
+            </div>
+          </div>
+
+          <div class="step-item" id="pstep-5">
+            <div class="step-icon">5</div>
+            <div class="step-content">
+              <div class="step-title"><span>Workforce Rider Re-assignment</span><small class="step-status">-</small></div>
+              <div class="step-desc">Checks current rider route capacity or assigns next available rider.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision Banner Outcome -->
+        <div id="decisionBanner" class="decision-banner">
+          <div class="decision-header" id="decisionHeader">--</div>
+          <div id="decisionReason" style="font-size:13px; color: var(--text-secondary);">--</div>
+          <div class="decision-meta" id="decisionMeta"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 3: ORDERS & FLEET ================= -->
+  <div id="tab-orders" class="tab-content">
+    <div class="card">
+      <div class="table-controls">
+        <div>
+          <h2 style="font-size:16px; font-family: var(--font-heading);">Active Deliveries Fleet Tracker</h2>
+          <div class="subtitle" style="font-size:12px; color:var(--text-muted);">Real-time tracking of active customer parcels & route locations</div>
+        </div>
+        <div class="search-box">
+          <svg class="icon search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="orderSearchInput" class="form-control" placeholder="Search order ID or address..." onkeyup="renderOrdersTable()">
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Assigned Zone</th>
+              <th>Current Delivery Address</th>
+              <th>Assigned Rider</th>
+              <th>Promised Window</th>
+              <th>Location Changes</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 4: AUDIT LOG ================= -->
+  <div id="tab-audit" class="tab-content">
+    <div class="card">
+      <div class="table-controls">
+        <div>
+          <h2 style="font-size:16px; font-family: var(--font-heading);">Security & Audit Decision Logs</h2>
+          <div class="subtitle" style="font-size:12px; color:var(--text-muted);">Complete trace log of every location-change request and dispatcher validation</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="chip active" onclick="filterAuditLog('all', this)">All</button>
+          <button class="chip" onclick="filterAuditLog('approved', this)">Approved</button>
+          <button class="chip" onclick="filterAuditLog('rejected', this)">Rejected</button>
+          <button class="chip" onclick="filterAuditLog('flagged_fraud', this)">Fraud Flagged</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Req ID</th>
+              <th>Order ID</th>
+              <th>Channel</th>
+              <th>Fraud Risk Score</th>
+              <th>Status</th>
+              <th>Dispatcher Reason & Log Trace</th>
+            </tr>
+          </thead>
+          <tbody id="requestsTableBody">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<script>
+const API = "/api";
+let currentOrders = [];
+let currentZones = [];
+let currentRiders = [];
+let currentRequests = [];
+let auditFilter = "all";
+
+// Tab Switching
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Theme Toggle
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  showToast(`Switched to ${next} theme mode`, "info");
+}
+
+// Toast Notifications
+function showToast(msg, type = "info") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  let iconColor = "var(--info)";
+  if (type === "success") iconColor = "var(--success)";
+  if (type === "danger") iconColor = "var(--danger)";
+
+  toast.innerHTML = `
+    <svg class="icon" style="color: ${iconColor};" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    <span>${msg}</span>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(100%)";
+    toast.style.transition = "all 0.3s ease";
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// Fetch All Data
+async function refreshAll(showToastAlert = false) {
+  try {
+    const [orders, zones, riders, summary, reqs] = await Promise.all([
+      fetch(`${API}/orders`).then(r => r.json()),
+      fetch(`${API}/zones`).then(r => r.json()),
+      fetch(`${API}/riders`).then(r => r.json()),
+      fetch(`${API}/dashboard/summary`).then(r => r.json()),
+      fetch(`${API}/change-requests`).then(r => r.json())
+    ]);
+
+    currentOrders = orders;
+    currentZones = zones;
+    currentRiders = riders;
+    currentRequests = reqs;
+
+    renderKPIs(summary);
+    renderZones(zones);
+    renderRiders(riders);
+    renderFormDropdowns();
+    renderOrdersTable();
+    renderRequestsTable();
+
+    if (showToastAlert) showToast("Dashboard data updated", "success");
+  } catch (err) {
+    console.error("Fetch error:", err);
+    showToast("Failed to connect to backend", "danger");
+  }
+}
+
+// Render Dashboard KPIs
+function renderKPIs(s) {
+  document.getElementById("kpiTotal").textContent = s.total_requests || 0;
+  document.getElementById("kpiApproved").textContent = s.approved || 0;
+  document.getElementById("kpiRejected").textContent = s.rejected || 0;
+  document.getElementById("kpiFraud").textContent = s.fraud_flagged || 0;
+  document.getElementById("kpiAvgScore").textContent = `Avg Fraud Index: ${s.average_fraud_score.toFixed(3)}`;
+}
+
+// Render Zones Gate Capacity
+function renderZones(zones) {
+  const container = document.getElementById("zoneCapacityList");
+  container.innerHTML = zones.map(z => {
+    const pct = Math.min(100, Math.round((100 * z.current_load) / z.capacity_per_slot));
+    let color = "var(--success)";
+    if (pct > 60) color = "var(--warning)";
+    if (pct >= 90) color = "var(--danger)";
+
+    return `
+      <div class="zone-item">
+        <div class="zone-meta">
+          <span class="zone-name">${z.name}</span>
+          <span class="zone-stats">
+            <strong>${z.current_load}/${z.capacity_per_slot} slots</strong> &middot; Gate closes ${z.gate_close_time.toFixed(1)}h
+          </span>
+        </div>
+        <div class="progress-bg">
+          <div class="progress-fill" style="width: ${pct}%; background: ${color};"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// Render Rider Workforce Status
+function renderRiders(riders) {
+  const container = document.getElementById("riderList");
+  container.innerHTML = riders.map(r => `
+    <div class="rider-card">
+      <div class="rider-avatar">${r.name.split(' ').map(n=>n[0]).join('')}</div>
+      <div class="rider-info">
+        <div class="rider-name">${r.name}</div>
+        <div class="rider-load">${r.current_load} active parcel route(s)</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+// Render Dropdowns
+function renderFormDropdowns() {
+  const orderSel = document.getElementById("orderSelect");
+  const zoneSel = document.getElementById("zoneSelect");
+
+  if (orderSel && currentOrders.length) {
+    const currVal = orderSel.value;
+    orderSel.innerHTML = currentOrders.map(o =>
+      `<option value="${o.order_id}">${o.order_id} &mdash; ${o.customer_id} (${o.zone_name})</option>`
+    ).join("");
+    if (currVal) orderSel.value = currVal;
+  }
+
+  if (zoneSel && currentZones.length) {
+    const currVal = zoneSel.value;
+    zoneSel.innerHTML = currentZones.map(z =>
+      `<option value="${z.zone_id}">${z.zone_id}: ${z.name}</option>`
+    ).join("");
+    if (currVal) zoneSel.value = currVal;
+  }
+}
+
+// Render Orders Fleet Table
+function renderOrdersTable() {
+  const query = (document.getElementById("orderSearchInput")?.value || "").toLowerCase();
+  const filtered = currentOrders.filter(o =>
+    o.order_id.toLowerCase().includes(query) ||
+    o.current_address.toLowerCase().includes(query) ||
+    o.customer_id.toLowerCase().includes(query) ||
+    o.zone_name.toLowerCase().includes(query)
+  );
+
+  const tbody = document.getElementById("ordersTableBody");
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No orders match search query</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(o => `
+    <tr>
+      <td><strong>${o.order_id}</strong></td>
+      <td>${o.customer_id}</td>
+      <td><span class="badge badge-channel">${o.zone_name}</span></td>
+      <td>${o.current_address}</td>
+      <td>${o.rider_name || '<em style="color:var(--text-muted)">Unassigned</em>'}</td>
+      <td>${o.promised_window[0].toFixed(2)}h &ndash; ${o.promised_window[1].toFixed(2)}h</td>
+      <td>
+        ${o.change_history.length
+          ? o.change_history.map(c => `<div style="font-size:11px;"><span class="badge badge-approved" style="font-size:10px;">${c.outcome}</span> @ ${c.timestamp}h</div>`).join("")
+          : '<small style="color:var(--text-muted)">Original location</small>'
+        }
+      </td>
+    </tr>
+  `).join("");
+}
+
+// Filter Audit Log
+function filterAuditLog(status, btn) {
+  auditFilter = status;
+  document.querySelectorAll('#tab-audit .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderRequestsTable();
+}
+
+// Render Audit Log Table
+function renderRequestsTable() {
+  let list = currentRequests.slice().reverse();
+  if (auditFilter !== "all") {
+    if (auditFilter === "approved") {
+      list = list.filter(r => r.status === "auto_approved" || r.status === "dispatcher_approved");
+    } else if (auditFilter === "rejected") {
+      list = list.filter(r => r.status === "rejected");
+    } else if (auditFilter === "flagged_fraud") {
+      list = list.filter(r => r.status === "flagged_fraud");
+    }
+  }
+
+  const tbody = document.getElementById("requestsTableBody");
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No requests recorded for this filter</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(r => {
+    let badgeClass = "badge-rejected";
+    if (r.status === "auto_approved" || r.status === "dispatcher_approved") badgeClass = "badge-approved";
+    if (r.status === "flagged_fraud") badgeClass = "badge-fraud";
+
+    return `
+      <tr>
+        <td><code>${r.request_id}</code></td>
+        <td><strong>${r.order_id}</strong></td>
+        <td><span class="badge badge-channel">${r.channel}</span></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="color: ${r.fraud_score > 0.45 ? 'var(--danger)' : 'var(--success)'}">${r.fraud_score.toFixed(3)}</strong>
+          </div>
+        </td>
+        <td><span class="badge ${badgeClass}">${r.status}</span></td>
+        <td><small style="color:var(--text-secondary)">${r.reason_log.join(" · ")}</small></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// Quick Preset Handlers
+function applyPreset(preset) {
+  const orderSel = document.getElementById("orderSelect");
+  const zoneSel = document.getElementById("zoneSelect");
+  const addrInput = document.getElementById("newAddressInput");
+  const channelSel = document.getElementById("channelSelect");
+  const dispatcherSel = document.getElementById("dispatcherType");
+
+  if (preset === 'legit_app') {
+    if (orderSel.options.length) orderSel.selectedIndex = 0;
+    if (zoneSel.options.length) zoneSel.selectedIndex = 0;
+    addrInput.value = "Palm Meadows, Block B, Flat 402 (In-App Request)";
+    channelSel.value = "app";
+    dispatcherSel.value = "smart";
+    showToast("Loaded Preset: Legitimate In-App Change", "info");
+  } else if (preset === 'fraud_call') {
+    if (orderSel.options.length) orderSel.selectedIndex = 1;
+    if (zoneSel.options.length) zoneSel.selectedIndex = 3; // zone jump
+    addrInput.value = "Tech Valley Business Hub, Tower 1 (Suspicious Call)";
+    channelSel.value = "call";
+    dispatcherSel.value = "smart";
+    showToast("Loaded Preset: Suspicious High-Risk Call", "info");
+  } else if (preset === 'gate_close') {
+    if (orderSel.options.length) orderSel.selectedIndex = 2;
+    if (zoneSel.options.length) zoneSel.selectedIndex = 3;
+    addrInput.value = "Late Night Gate Delivery Gate 4";
+    channelSel.value = "sms";
+    dispatcherSel.value = "smart";
+    showToast("Loaded Preset: Gate Closure Test", "info");
+  } else if (preset === 'sms_otp') {
+    if (orderSel.options.length) orderSel.selectedIndex = 0;
+    if (zoneSel.options.length) zoneSel.selectedIndex = 1;
+    addrInput.value = "Cyber Towers Office Park, Desk 99";
+    channelSel.value = "sms";
+    dispatcherSel.value = "smart";
+    showToast("Loaded Preset: SMS Step-Up OTP Verification", "info");
+  }
+}
+
+// Form Submission & Visual Pipeline Execution
+async function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const order_id = document.getElementById("orderSelect").value;
+  const new_zone_id = document.getElementById("zoneSelect").value;
+  const new_address = document.getElementById("newAddressInput").value;
+  const channel = document.getElementById("channelSelect").value;
+  const dispatcher_type = document.getElementById("dispatcherType").value;
+
+  // Reset Pipeline Stepper UI
+  resetPipelineVisualizer();
+
+  // Simulate Step-by-Step execution animation
+  await animateStep("pstep-1", "active");
+
+  try {
+    const res = await fetch(`${API}/change-request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id, new_zone_id, new_address, channel, dispatcher_type })
+    });
+    const data = await res.json();
+
+    // Render Step-by-Step results based on backend evaluation log
+    renderPipelineResults(data);
+
+    // Refresh underlying data tables
+    await refreshAll();
+
+    showToast(`Request ${data.success ? 'Approved' : 'Rejected'}: ${data.reason}`, data.success ? "success" : "danger");
+  } catch (err) {
+    console.error("Submission error:", err);
+    showToast("Error processing change request", "danger");
+  }
+}
+
+function resetPipelineVisualizer() {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`pstep-${i}`);
+    el.className = "step-item";
+    el.querySelector('.step-status').textContent = "-";
+  }
+  const banner = document.getElementById("decisionBanner");
+  banner.style.display = "none";
+}
+
+async function animateStep(stepId, state, detailText = "") {
+  const el = document.getElementById(stepId);
+  el.className = `step-item ${state}`;
+  if (detailText) el.querySelector('.step-status').textContent = detailText;
+  await new Promise(r => setTimeout(r, 250));
+}
+
+async function renderPipelineResults(data) {
+  const isBaseline = document.getElementById("dispatcherType").value === "baseline";
+
+  if (isBaseline) {
+    await animateStep("pstep-1", "passed", "Bypassed (Naive Baseline)");
+    await animateStep("pstep-2", "passed", "Bypassed");
+    await animateStep("pstep-3", "passed", "Bypassed");
+    await animateStep("pstep-4", "passed", "Bypassed");
+    await animateStep("pstep-5", "passed", "Auto-Approved");
+  } else {
+    // Smart Dispatcher Steps Evaluation
+    // Step 1: Fraud Engine
+    const fraudBlocked = data.status === "flagged_fraud";
+    await animateStep("pstep-1", fraudBlocked ? "failed" : "passed", `Score: ${data.fraud_score.toFixed(3)}`);
+
+    // Step 2: OTP
+    const otpPassed = data.otp_verified;
+    await animateStep("pstep-2", otpPassed ? "passed" : "failed", otpPassed ? "OTP Verified" : "OTP Failed");
+
+    // Step 3: Window / Gate
+    const isGateFail = data.reason.includes("gate_hours") || data.reason.includes("time_window");
+    await animateStep("pstep-3", isGateFail ? "failed" : "passed", isGateFail ? "Time/Gate Fail" : "Hours OK");
+
+    // Step 4: Capacity
+    const isCapFail = data.reason.includes("capacity");
+    await animateStep("pstep-4", isCapFail ? "failed" : "passed", isCapFail ? "Slot Full" : "Capacity OK");
+
+    // Step 5: Workforce / Dispatcher Review
+    const isWorkforceFail = data.reason.includes("workforce") || data.reason.includes("dispatcher_declined");
+    await animateStep("pstep-5", (data.success && !isWorkforceFail) ? "passed" : (isWorkforceFail ? "failed" : "passed"), data.status);
+  }
+
+  // Show Final Outcome Banner
+  const banner = document.getElementById("decisionBanner");
+  banner.style.display = "block";
+  banner.className = `decision-banner ${data.success ? 'approved' : 'rejected'}`;
+
+  document.getElementById("decisionHeader").innerHTML = `
+    <svg class="icon" viewBox="0 0 24 24"><path d="${data.success ? 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z' : 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'}"/></svg>
+    ${data.success ? 'DECISION: APPROVED & APPLIED' : 'DECISION: REQUEST REJECTED'}
+  `;
+  document.getElementById("decisionReason").textContent = `Primary Reason: ${data.reason}`;
+  document.getElementById("decisionMeta").innerHTML = `
+    <span>Req ID: <code>${data.request_id}</code></span>
+    <span>Status: <strong>${data.status}</strong></span>
+    <span>Fraud Score: <strong>${data.fraud_score.toFixed(3)}</strong></span>
+    <span>OTP Verified: <strong>${data.otp_verified ? 'Yes' : 'No'}</strong></span>
+  `;
+}
+
+// Reset Demo Data
+async function resetDemoData() {
+  try {
+    await fetch(`${API}/reset-demo`, { method: "POST" });
+    resetPipelineVisualizer();
+    await refreshAll();
+    showToast("Demo datasets reseeded successfully", "success");
+  } catch (err) {
+    showToast("Failed to reset demo data", "danger");
+  }
+}
+
+// Auto-refresh every 6 seconds
+refreshAll();
+setInterval(() => refreshAll(false), 6000);
+</script>
+</body>
+</html>

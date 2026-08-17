@@ -1,0 +1,58 @@
+[
+  {
+    "request_id": "4a5525ce",
+    "order_id": "O1001",
+    "new_zone_id": "Z1",
+    "new_address": "Palm Meadows, Block B, Flat 402 (In-App Request)",
+    "channel": "app",
+    "requested_at": 22.07,
+    "status": "rejected",
+    "fraud_score": 0.0,
+    "otp_verified": true,
+    "reason_log": [
+      "rejected: delivery would occur after gate close time at new zone"
+    ]
+  },
+  {
+    "request_id": "36e4f3ff",
+    "order_id": "O1002",
+    "new_zone_id": "Z4",
+    "new_address": "Tech Valley Business Hub, Tower 1 (Suspicious Call)",
+    "channel": "call",
+    "requested_at": 22.07,
+    "status": "rejected",
+    "fraud_score": 0.34,
+    "otp_verified": true,
+    "reason_log": [
+      "rejected: delivery would occur after gate close time at new zone"
+    ]
+  },
+  {
+    "request_id": "39adf1b1",
+    "order_id": "O1001",
+    "new_zone_id": "Z2",
+    "new_address": "Cyber Towers Office Park, Desk 99",
+    "channel": "sms",
+    "requested_at": 22.07,
+    "status": "rejected",
+    "fraud_score": 0.2,
+    "otp_verified": false,
+    "reason_log": [
+      "rejected: OTP/identity verification failed"
+    ]
+  },
+  {
+    "request_id": "b4c3d3a1",
+    "order_id": "O1003",
+    "new_zone_id": "Z4",
+    "new_address": "Late Night Gate Delivery Gate 4",
+    "channel": "sms",
+    "requested_at": 22.07,
+    "status": "rejected",
+    "fraud_score": 0.2,
+    "otp_verified": true,
+    "reason_log": [
+      "rejected: delivery would occur after gate close time at new zone"
+    ]
+  }
+]
